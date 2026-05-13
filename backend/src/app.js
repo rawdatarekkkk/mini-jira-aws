@@ -6,6 +6,7 @@ const tasksRoutes = require("./routes/tasks.routes");
 const projectsRoutes = require("./routes/projects.routes");
 const usersRoutes = require("./routes/users.routes");
 const teamsRoutes = require("./routes/teams.routes");
+const uploadRoutes = require("./routes/upload.routes");
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use("/api/users", usersRoutes);
 app.use("/api/teams", teamsRoutes);
 app.use("/api/projects", projectsRoutes);
 app.use("/api/tasks", tasksRoutes);
+app.use("/api/upload", uploadRoutes);
 
 app.use(errorHandler);
 
