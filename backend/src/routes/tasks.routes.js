@@ -25,6 +25,8 @@ const {
 } = require("../utils/taskConstants");
 const { badRequest, forbidden, notFound } = require("../utils/errors");
 const commentsRoutes = require("./comments.routes");
+const { publishTaskAssignment } = require("../services/sns");
+const { deleteImage } = require("../services/s3");
 
 const router = express.Router();
 
@@ -180,6 +182,21 @@ router.post(
     };
 
     await createTask(task);
+
+    // Notify the assignee via SNS (fans out to email + SQS worker Lambda)
+    try {
+      await publishTaskAssignment({
+        taskId: task.taskId,
+        taskTitle: task.title,
+        assigneeId: task.assigneeId,
+        assigneeName: task.assigneeName,
+        teamId: task.teamId,
+      });
+    } catch (snsErr) {
+      // Log but don't fail the request if SNS is unavailable
+      console.error("SNS publish failed:", snsErr.message);
+    }
+
     res.status(201).json({ task });
   })
 );
@@ -318,6 +335,15 @@ router.delete(
   requireRoles("MANAGER", "ADMIN"),
   loadTask,
   asyncHandler(async (req, res) => {
+    // Delete the image from S3 before removing the task record
+    if (req.task.imageOriginalKey) {
+      try {
+        await deleteImage(req.task.imageOriginalKey);
+      } catch (s3Err) {
+        console.error("S3 delete failed:", s3Err.message);
+      }
+    }
+
     await deleteTask(req.params.taskId);
     res.status(204).send();
   })

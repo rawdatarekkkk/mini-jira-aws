@@ -1,0 +1,11 @@
+{
+  "name": "assignment-worker",
+  "version": "1.0.0",
+  "description": "Drains the SQS assignment queue, writes activity logs to DynamoDB, and publishes a CloudWatch metric",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-cloudwatch": "^3.1045.0",
+    "@aws-sdk/client-dynamodb": "^3.1045.0",
+    "@aws-sdk/lib-dynamodb": "^3.1045.0"
+  }
+}

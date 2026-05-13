@@ -1,0 +1,11 @@
+{
+  "name": "daily-digest",
+  "version": "1.0.0",
+  "description": "Triggered by EventBridge at 9 AM daily. Scans tasks due today and emails each assignee via SNS.",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1045.0",
+    "@aws-sdk/client-sns": "^3.1045.0",
+    "@aws-sdk/lib-dynamodb": "^3.1045.0"
+  }
+}
