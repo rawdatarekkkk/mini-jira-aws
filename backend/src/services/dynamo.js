@@ -105,6 +105,29 @@ async function scanTable(tableName) {
   return items;
 }
 
+async function scanTableWithFilter(tableName, filterExpression, values, names = {}) {
+  const items = [];
+  let lastEvaluatedKey;
+
+  do {
+    const result = await client.send(
+      new ScanCommand({
+        TableName: tableName,
+        FilterExpression: filterExpression,
+        ExpressionAttributeValues: values,
+        ExpressionAttributeNames:
+          Object.keys(names).length > 0 ? names : undefined,
+        ExclusiveStartKey: lastEvaluatedKey,
+      })
+    );
+
+    items.push(...(result.Items || []));
+    lastEvaluatedKey = result.LastEvaluatedKey;
+  } while (lastEvaluatedKey);
+
+  return items;
+}
+
 async function queryByIndex(tableName, indexName, keyName, keyValue) {
   const items = [];
   let lastEvaluatedKey;
@@ -134,6 +157,19 @@ async function queryByIndex(tableName, indexName, keyName, keyValue) {
 
 async function getUserById(userId) {
   return getItem(tables.users, { userId });
+}
+
+async function listUsers() {
+  return scanTable(tables.users);
+}
+
+async function listUsersByTeam(teamId) {
+  return scanTableWithFilter(
+    tables.users,
+    "#teamId = :teamId",
+    { ":teamId": teamId },
+    { "#teamId": "teamId" }
+  );
 }
 
 async function getProjectById(projectId) {
@@ -201,8 +237,19 @@ async function createActivityLog(entry) {
   return putItem(tables.activityLog, entry);
 }
 
+async function listActivityLogsForTask(taskId) {
+  return scanTableWithFilter(
+    tables.activityLog,
+    "#taskId = :taskId",
+    { ":taskId": taskId },
+    { "#taskId": "taskId" }
+  );
+}
+
 module.exports = {
   getUserById,
+  listUsers,
+  listUsersByTeam,
   getProjectById,
   listProjects,
   createProject,
@@ -218,4 +265,5 @@ module.exports = {
   listCommentsForTask,
   createComment,
   createActivityLog,
+  listActivityLogsForTask,
 };

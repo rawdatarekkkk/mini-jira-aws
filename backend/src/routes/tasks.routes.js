@@ -16,6 +16,7 @@ const {
   updateTask,
   deleteTask,
   createActivityLog,
+  listActivityLogsForTask,
 } = require("../services/dynamo");
 const {
   isValidStatus,
@@ -57,6 +58,22 @@ async function loadTask(req, res, next) {
   return next();
 }
 
+async function recordStatusChange(task, userId, previousStatus, status) {
+  if (previousStatus === status) {
+    return;
+  }
+
+  await createActivityLog({
+    logId: uuidv4(),
+    eventType: "STATUS_CHANGE",
+    taskId: task.taskId,
+    teamId: task.teamId,
+    assigneeId: userId,
+    message: `Status changed from ${previousStatus} to ${status}`,
+    createdAt: new Date().toISOString(),
+  });
+}
+
 router.get(
   "/",
   asyncHandler(async (req, res) => {
@@ -77,8 +94,22 @@ router.get(
       throw forbidden("You do not have access to this team's tasks");
     }
 
+    if (!req.user.teamId) {
+      throw forbidden("Employee account is missing a team assignment");
+    }
+
     const tasks = await listTasksForTeam(req.user.teamId);
     res.json({ tasks });
+  })
+);
+
+router.get(
+  "/:taskId/activity",
+  loadTask,
+  asyncHandler(async (req, res) => {
+    const activity = await listActivityLogsForTask(req.params.taskId);
+    activity.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    res.json({ activity });
   })
 );
 
@@ -232,6 +263,16 @@ router.put(
     }
 
     const task = await updateTask(req.params.taskId, updates);
+
+    if (fields.status !== undefined) {
+      await recordStatusChange(
+        req.task,
+        req.user.userId,
+        req.task.status,
+        fields.status
+      );
+    }
+
     res.json({ task });
   })
 );
@@ -266,15 +307,7 @@ router.patch(
 
     const task = await updateTask(req.params.taskId, updates);
 
-    await createActivityLog({
-      logId: uuidv4(),
-      eventType: "STATUS_CHANGE",
-      taskId: req.task.taskId,
-      teamId: req.task.teamId,
-      assigneeId: req.user.userId,
-      message: `Status changed from ${previousStatus} to ${status}`,
-      createdAt: now,
-    });
+    await recordStatusChange(req.task, req.user.userId, previousStatus, status);
 
     res.json({ task });
   })

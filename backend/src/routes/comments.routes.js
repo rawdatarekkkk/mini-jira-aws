@@ -3,7 +3,6 @@ const { v4: uuidv4 } = require("uuid");
 const asyncHandler = require("../utils/asyncHandler");
 const {
   authenticate,
-  isManager,
   assertEmployeeTeamAccess,
 } = require("../middleware/auth");
 const {
