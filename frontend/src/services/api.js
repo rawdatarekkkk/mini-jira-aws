@@ -4,6 +4,7 @@ import { configureAmplify, isAuthConfigured } from "../config/amplify.js";
 
 configureAmplify();
 
+// Sends the Cognito ID token (has `aud` = app client id). Member 4's middleware verifies it with JWKS.
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
 });
