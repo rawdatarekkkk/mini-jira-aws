@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { LayoutDashboard, LogOut } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useToast } from "../../hooks/useToast.js";
+import { userService } from "../../services/userService.js";
 
 const navLinkClass = ({ isActive }) =>
   `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
@@ -12,6 +14,13 @@ const navLinkClass = ({ isActive }) =>
 
 export function AppLayout() {
   const { claims, logOut } = useAuth();
+
+  // Calling /me on mount triggers the authenticate middleware on the backend,
+  // which upserts this user's record into DynamoDB. This ensures accounts
+  // created directly in the Cognito console appear in GET /api/users.
+  useEffect(() => {
+    userService.me().catch(() => {});
+  }, []);
   const navigate = useNavigate();
   const { showToast } = useToast();
 

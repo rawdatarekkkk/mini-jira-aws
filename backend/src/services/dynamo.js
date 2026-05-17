@@ -159,6 +159,10 @@ async function getUserById(userId) {
   return getItem(tables.users, { userId });
 }
 
+async function upsertUser(user) {
+  return putItem(tables.users, user);
+}
+
 async function listUsers() {
   return scanTable(tables.users);
 }
@@ -248,6 +252,7 @@ async function listActivityLogsForTask(taskId) {
 
 module.exports = {
   getUserById,
+  upsertUser,
   listUsers,
   listUsersByTeam,
   getProjectById,

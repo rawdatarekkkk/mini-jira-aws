@@ -40,6 +40,21 @@ export function AuthProvider({ children }) {
       setClaims(nextClaims);
       setAuthError(null);
     } catch {
+      // Fallback: getCurrentUser() can fail immediately after signIn() due to
+      // Amplify v6 async storage timing. If we still have valid tokens, use them.
+      try {
+        const session = await fetchAuthSession();
+        const payload = session.tokens?.idToken?.payload ?? null;
+        if (payload) {
+          const nextClaims = parseIdTokenClaims(payload);
+          setUser({ userId: payload.sub, username: nextClaims.username || nextClaims.email });
+          setClaims(nextClaims);
+          setAuthError(null);
+          return;
+        }
+      } catch {
+        // Session is genuinely gone — fall through to signed-out state
+      }
       setUser(null);
       setClaims(null);
     }
@@ -66,10 +81,23 @@ export function AuthProvider({ children }) {
         err.code = "AuthNotConfigured";
         throw err;
       }
-      await signIn({
+      const result = await signIn({
         username: email.trim(),
         password,
       });
+      // Amplify returns isSignedIn:false when Cognito requires an extra step
+      // (e.g. FORCE_CHANGE_PASSWORD on admin-created accounts). Surface it so
+      // the catch in LoginPage can show a useful message instead of a silent failure.
+      if (!result.isSignedIn) {
+        const step = result.nextStep?.signInStep ?? "UNKNOWN";
+        const err = new Error(
+          step === "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED"
+            ? "Your account has a temporary password. Ask your administrator to reset it in Cognito, or re-register through the sign-up page."
+            : `Sign-in requires an additional step: ${step}`
+        );
+        err.code = step;
+        throw err;
+      }
       await refreshSession();
     },
     [refreshSession]

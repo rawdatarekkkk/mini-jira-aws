@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth.js";
 import { useToast } from "../hooks/useToast.js";
@@ -7,11 +7,19 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signInEmailPassword, isConfigured } = useAuth();
+  const { user, signInEmailPassword, isConfigured } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from || "/dashboard";
+
+  // Navigate only after the user state has been committed to context.
+  // Calling navigate() synchronously inside handleSubmit races against
+  // the setUser() call inside refreshSession — ProtectedRoute would see
+  // user=null and bounce back to /login before the re-render lands.
+  useEffect(() => {
+    if (user) navigate(from, { replace: true });
+  }, [user, from, navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -26,7 +34,7 @@ export default function LoginPage() {
     try {
       await signInEmailPassword(email, password);
       showToast("Signed in successfully.", "success");
-      navigate(from, { replace: true });
+      // Navigation is handled by the useEffect above once user state updates.
     } catch (err) {
       const name = err?.name || err?.code;
       if (name === "UserNotConfirmedException") {

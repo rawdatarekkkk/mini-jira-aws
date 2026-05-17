@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const jwksClient = require("jwks-rsa");
 const asyncHandler = require("../utils/asyncHandler");
 const { unauthorized, forbidden } = require("../utils/errors");
+const { upsertUser } = require("../services/dynamo");
 
 const region = process.env.AWS_REGION;
 const userPoolId = process.env.COGNITO_USER_POOL_ID;
@@ -87,6 +88,18 @@ const authenticate = asyncHandler(async (req, res, next) => {
   }
 
   req.user = user;
+
+  // Fire-and-forget: keep the DynamoDB Users table in sync with Cognito.
+  // Runs on every authenticated request so accounts created via the Cognito
+  // console (without a Post-Confirmation Lambda) still get a DB record.
+  upsertUser({
+    userId: user.userId,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    teamId: user.teamId || null,
+  }).catch(() => {});
+
   next();
 });
 
