@@ -14,4 +14,6 @@ export const taskService = {
     form.append('image', file);
     return api.post('/upload', form).then(r => r.data.key);
   },
+  getImageUrl: (key, bucket = 'original') =>
+    api.get('/upload/url', { params: { key, bucket } }).then(r => r.data.url),
 };
