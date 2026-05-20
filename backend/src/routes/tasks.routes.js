@@ -125,7 +125,7 @@ router.get(
 
 router.post(
   "/",
-  requireRoles("MANAGER", "ADMIN"),
+  requireRoles("MANAGER"),
   asyncHandler(async (req, res) => {
     const fields = pickTaskFields(req.body);
 
@@ -203,7 +203,7 @@ router.post(
 
 router.put(
   "/:taskId",
-  requireRoles("MANAGER", "ADMIN"),
+  requireRoles("MANAGER"),
   loadTask,
   asyncHandler(async (req, res) => {
     const fields = pickTaskFields(req.body);
@@ -332,7 +332,7 @@ router.patch(
 
 router.delete(
   "/:taskId",
-  requireRoles("MANAGER", "ADMIN"),
+  requireRoles("MANAGER"),
   loadTask,
   asyncHandler(async (req, res) => {
     // Delete the image from S3 before removing the task record

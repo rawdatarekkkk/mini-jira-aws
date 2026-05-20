@@ -42,7 +42,7 @@ router.get(
 
 router.get(
   "/",
-  requireRoles("MANAGER", "ADMIN"),
+  requireRoles("MANAGER"),
   asyncHandler(async (req, res) => {
     const users = await listUsers();
     res.json({ users: users.map(toPublicUser) });

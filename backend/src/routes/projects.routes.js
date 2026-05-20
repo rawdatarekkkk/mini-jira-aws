@@ -38,7 +38,7 @@ router.get(
 
 router.post(
   "/",
-  requireRoles("MANAGER", "ADMIN"),
+  requireRoles("MANAGER"),
   asyncHandler(async (req, res) => {
     const { name, description } = req.body;
 
@@ -63,7 +63,7 @@ router.post(
 
 router.put(
   "/:projectId",
-  requireRoles("MANAGER", "ADMIN"),
+  requireRoles("MANAGER"),
   asyncHandler(async (req, res) => {
     const existing = await getProjectById(req.params.projectId);
 
@@ -94,7 +94,7 @@ router.put(
 
 router.delete(
   "/:projectId",
-  requireRoles("MANAGER", "ADMIN"),
+  requireRoles("MANAGER"),
   asyncHandler(async (req, res) => {
     const existing = await getProjectById(req.params.projectId);
 

@@ -97,7 +97,6 @@ export default function RegisterPage() {
             >
               <option value="employee">Employee</option>
               <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
             </select>
           </div>
           {role === "employee" ? (

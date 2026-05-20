@@ -120,7 +120,7 @@ function requireRoles(...roles) {
 }
 
 function isManager(user) {
-  return user.role === "MANAGER" || user.role === "ADMIN";
+  return user.role === "MANAGER";
 }
 
 function assertEmployeeTeamAccess(user, teamId) {

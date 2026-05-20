@@ -97,7 +97,10 @@ export default function ManagerDashboard() {
         setProjects(p ?? []);
         setUsers(u ?? []);
       } catch (err) {
-        showToast(err?.response?.data?.message || 'Failed to load data', 'error');
+        showToast(
+          err?.response?.data?.error || err?.response?.data?.message || 'Failed to load data',
+          'error',
+        );
       } finally {
         setLoading(false);
         setRefreshing(false);
