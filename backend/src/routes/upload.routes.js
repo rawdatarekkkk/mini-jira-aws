@@ -2,7 +2,12 @@ const express = require("express");
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
 const { authenticate } = require("../middleware/auth");
-const { uploadImage } = require("../services/s3");
+const {
+  uploadImage,
+  getPresignedUrl,
+  ORIGINAL_BUCKET,
+  RESIZED_BUCKET,
+} = require("../services/s3");
 const asyncHandler = require("../utils/asyncHandler");
 const { badRequest } = require("../utils/errors");
 
@@ -38,6 +43,38 @@ router.post(
     await uploadImage(key, req.file.buffer, req.file.mimetype);
 
     res.status(201).json({ key });
+  })
+);
+
+function resolveBucket(bucketParam) {
+  const bucket = (bucketParam || "original").toLowerCase();
+
+  if (bucket === "original") {
+    return ORIGINAL_BUCKET;
+  }
+
+  if (bucket === "resized") {
+    return RESIZED_BUCKET;
+  }
+
+  throw badRequest('bucket must be "original" or "resized"');
+}
+
+// GET /api/upload/url?key=...&bucket=original|resized
+router.get(
+  "/url",
+  authenticate,
+  asyncHandler(async (req, res) => {
+    const key = req.query.key;
+
+    if (!key || !String(key).trim()) {
+      throw badRequest("key query parameter is required");
+    }
+
+    const bucketName = resolveBucket(req.query.bucket);
+    const url = await getPresignedUrl(bucketName, String(key).trim());
+
+    res.json({ url });
   })
 );
 

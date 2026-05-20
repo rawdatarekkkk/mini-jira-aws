@@ -81,7 +81,7 @@ export default function TaskDetailsModal({ task, isOpen, onClose, onStatusChange
   const [activeTab, setActiveTab]       = useState('comments');
 
   const userId  = claims?.raw?.sub ?? null;
-  const isManager = claims?.role === 'manager' || claims?.role === 'admin';
+  const isManager = claims?.role === 'manager';
   const isAssignee = task?.assigneeId === userId;
   const canChangeStatus = isManager || isAssignee;
   const forwardStatuses = task ? nextStatuses(task.status) : [];

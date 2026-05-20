@@ -36,7 +36,10 @@ export default function EmployeeDashboard() {
         const data = await taskService.list(params);
         setTasks(data ?? []);
       } catch (err) {
-        showToast(err?.response?.data?.message ?? 'Failed to load tasks', 'error');
+        showToast(
+          err?.response?.data?.error ?? err?.response?.data?.message ?? 'Failed to load tasks',
+          'error',
+        );
       } finally {
         setLoading(false);
         setRefreshing(false);

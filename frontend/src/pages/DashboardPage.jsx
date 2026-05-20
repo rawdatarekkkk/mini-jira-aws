@@ -27,7 +27,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (role === "manager" || role === "admin") {
+  if (role === "manager") {
     return <ManagerDashboard />;
   }
 
