@@ -6,11 +6,10 @@ The application is built with a React/Vite frontend, an Express.js backend, Amaz
 
 ## Live Application
 
-- CloudFront URL: `https://dxxxxx.cloudfront.net`
-- ALB URL: `http://mini-jira-alb-xxxxxxxx.eu-north-1.elb.amazonaws.com`
+- CloudFront URL: `https://digbiwcb86fsu.cloudfront.net`
+- ALB URL: `http://mini-jira-alb-789371030.eu-north-1.elb.amazonaws.com`
 - AWS Region: `eu-north-1`
 
-Update the CloudFront and ALB URLs above with the final deployed endpoints before submission.
 
 ## Team Members and Roles
 
@@ -27,9 +26,7 @@ Update the CloudFront and ALB URLs above with the final deployed endpoints befor
 
 The final submission must include a detailed AWS architecture diagram using AWS standard icons.
 
-![Mini Jira AWS Architecture Diagram](docs/architecture-diagram/aws-architecture-diagram.svg)
-
-If the diagram is hosted externally, replace the image path above with the final diagram link. For the final PDF submission, export the diagram with official AWS Architecture Icons if required by the course rubric. The diagram should show users reaching CloudFront, CloudFront routing to the Application Load Balancer, the ALB forwarding traffic to EC2 instances in an Auto Scaling Group across two Availability Zones, the backend using Cognito, DynamoDB, S3, SNS, SQS, Lambda, EventBridge, CloudWatch, IAM, and VPC networking components.
+![Mini Jira AWS Architecture Diagram](docs/architecture-diagram/mini-jira-architecture-final.png)
 
 ## AWS Services Used
 
@@ -81,17 +78,6 @@ If the diagram is hosted externally, replace the image path above with the final
 9. The assignment worker Lambda consumes SQS messages and records activity logs.
 10. EventBridge triggers the daily digest Lambda on a schedule.
 11. CloudWatch collects logs, dashboard metrics, and alarm state.
-
-## Member Dependencies
-
-| Member | Depends On |
-| --- | --- |
-| Jana Hendy | Cognito setup from Karma Kandil and backend auth middleware from Rawda Tarek. |
-| Abdelrahman Moussa | Tasks API and comments API from Rawda Tarek, and image upload support from Karma Kandil. |
-| Habiba Mahmoud | Projects API and tasks API from Rawda Tarek, and users/teams data from Karma Kandil or Rawda Tarek. |
-| Rawda Tarek | DynamoDB table names/indexes and Cognito User Pool details from Karma Kandil. |
-| Karma Kandil | Task/event format from Rawda Tarek. |
-| Jomana Shady | Backend readiness from Rawda Tarek, frontend readiness from Jana Hendy, Abdelrahman Moussa, and Habiba Mahmoud, and AWS resources from Karma Kandil. |
 
 ## How to Run Locally
 
@@ -155,3 +141,18 @@ lambdas/daily-digest/    Lambda for scheduled daily digest processing
 - Security groups should allow only the required inbound traffic.
 - IAM roles should grant only the permissions required by each compute service.
 - CloudWatch logs, dashboard widgets, and alarms should be configured before the demo.
+
+## Screenshots and Deployment Evidence
+
+A complete collection of application screenshots, AWS deployment screenshots,
+CloudWatch dashboards, alarms, Lambda configurations, networking setup,
+and testing evidence is available in the PDF below.
+
+[View Screenshots PDF](docs/screenshots/cloud-project-screenshots.pdf)
+
+## Demo Video
+
+Watch the full project demonstration here:
+
+[Mini Jira AWS Demo Video](https://drive.google.com/file/d/1TUNyd__Beg0fIO7U4gMMYiDcaZXgPRga/view?usp=sharing)
+
