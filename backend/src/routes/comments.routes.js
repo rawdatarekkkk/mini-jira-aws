@@ -9,6 +9,7 @@ const {
   getTaskById,
   listCommentsForTask,
   createComment,
+  getUserById,
 } = require("../services/dynamo");
 const { badRequest, notFound } = require("../utils/errors");
 
@@ -34,7 +35,22 @@ router.get(
   asyncHandler(async (req, res) => {
     const comments = await listCommentsForTask(req.params.taskId);
     comments.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-    res.json({ comments });
+
+    // Resolve real display names from the Users table so stale UUID usernames
+    // (stored before the auth fix) show the correct name/email.
+    const userCache = {};
+    const enriched = await Promise.all(
+      comments.map(async (c) => {
+        if (!c.userId) return c;
+        if (!userCache[c.userId]) {
+          const user = await getUserById(c.userId).catch(() => null);
+          userCache[c.userId] = user?.name || user?.email || c.userName;
+        }
+        return { ...c, userName: userCache[c.userId] };
+      })
+    );
+
+    res.json({ comments: enriched });
   })
 );
 

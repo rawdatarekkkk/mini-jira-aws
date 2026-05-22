@@ -54,7 +54,7 @@ function mapUserFromClaims(claims) {
   return {
     userId: claims.sub,
     email: claims.email,
-    name: claims.name || claims["cognito:username"] || claims.email,
+    name: claims.name || claims.email || claims["cognito:username"],
     role: role ? String(role).toUpperCase() : null,
     teamId: teamId || null,
   };
