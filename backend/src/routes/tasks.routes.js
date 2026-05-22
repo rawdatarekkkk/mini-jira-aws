@@ -305,7 +305,11 @@ router.patch(
     }
 
     if (!isManager(req.user)) {
-      if (req.task.assigneeId !== req.user.userId) {
+      const isAssignee =
+        req.task.assigneeId === req.user.userId ||
+        req.task.assigneeId === req.user.email;
+
+      if (!isAssignee) {
         throw forbidden("You can only update tasks assigned to you");
       }
 
