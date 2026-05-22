@@ -94,8 +94,7 @@ The final submission must include a detailed AWS architecture diagram using AWS 
    ```bash
    cd backend
    npm install
-   npm run db:create
-   npm run dev
+   npm start
    ```
 
 2. The backend starts on the port configured in `backend/.env`, currently `5001` in the example file.
