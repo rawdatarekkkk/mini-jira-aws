@@ -2,13 +2,24 @@ import { useState } from 'react';
 import {
   DndContext,
   DragOverlay,
+  pointerWithin,
   closestCenter,
   PointerSensor,
+  TouchSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
 import { useDroppable } from '@dnd-kit/core';
 import TaskCard from './TaskCard.jsx';
+
+// pointerWithin fires when the pointer is inside a column's bounding box —
+// the right algorithm for large droppable zones. Fall back to closestCenter
+// when the pointer is outside every column (e.g. dragged to the page margin).
+function detectCollision(args) {
+  const hits = pointerWithin(args);
+  return hits.length > 0 ? hits : closestCenter(args);
+}
 
 const COLUMNS = ['To Do', 'In Progress', 'In Review', 'Done'];
 
@@ -34,12 +45,12 @@ function DroppableColumn({ status, tasks, onTaskClick }) {
         </span>
       </div>
 
-      {/* Drop zone */}
+      {/* Drop zone — highlighted when a card is dragged over this column */}
       <div
         ref={setNodeRef}
         className={`flex-1 rounded-xl border-2 border-dashed p-2 transition-colors duration-150
-          ${isOver ? cfg.drop : 'border-transparent'}`}
-        style={{ minHeight: 200 }}
+          ${isOver ? `${cfg.drop} scale-[1.01]` : 'border-slate-200/60'}`}
+        style={{ minHeight: 220 }}
       >
         {tasks.length === 0 ? (
           <div className="flex h-full min-h-[160px] items-center justify-center text-xs text-slate-400">
@@ -65,7 +76,9 @@ export default function KanbanBoard({ tasks, onStatusChange, onTaskClick }) {
   const [activeTask, setActiveTask] = useState(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
+    useSensor(PointerSensor,  { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor,    { activationConstraint: { delay: 200, tolerance: 5 } }),
+    useSensor(KeyboardSensor)
   );
 
   const tasksByStatus = COLUMNS.reduce((acc, col) => {
@@ -94,7 +107,7 @@ export default function KanbanBoard({ tasks, onStatusChange, onTaskClick }) {
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={detectCollision}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
